@@ -1,2 +1,2 @@
 # DenseSmiles
-Finding the joint density of multiple FX rates using volatility smiles fitted from observed option prices. Application to pricing FX derivatives.
+Using optimal transport algorithms to calibrate a joint density of multiple FX rates using volatility smiles fitted from observed option prices. Application to pricing FX derivatives such as baskets and quanto derivatives.
