@@ -1,25 +1,8 @@
 """Code for handling implied vol data, fitting SVI smiles, transforming the smiles into probability densities"""
 
 import numpy as np
-from scipy.stats import norm
-from scipy.optimize import root_scalar
 from scipy.optimize import minimize
 import math
-
-def black_scholes_call(F, K, T, sigma):
-    """Black-Scholes price for a call option given forward F, strike K, expiry T, and implied vol sigma."""
-    """F is forward price; K is the raw strike; T is maturity; sigma is the volatility"""
-    d1 = (np.log(F / K) + 0.5 * sigma ** 2 * T) / (sigma * np.sqrt(T))
-    d2 = d1 - sigma * np.sqrt(T)
-    price = F * norm.cdf(d1) - K * norm.cdf(d2)
-    return price
-
-def implied_vol(F, K, T, price):
-    """Computes the Black-Scholes implied volatility given the call price"""
-    def obj(sigma):
-        return black_scholes_call(F, K, T, sigma) - price
-    result = root_scalar(obj, bracket=[-5, 5.0], method='brentq')
-    return result.root if result.converged else np.nan
 
 def svi_var(k_lognrm,params):
     """
@@ -58,7 +41,7 @@ def svi_rss(k_lognrm,params,obs_v,T):
 
 def svi_fit(k_lognrm,obs_vars,bestp,T):
     """Uses an initial guess, svi_rss loss function and scipy optimiser to fit an svi smile to implied volatility data"""
-    params_init = bestp  # initial guess for [a, b, sigma, rho, m] {"a": 0.05125, "b": 0.09, "rho": -0.3, "m": 1.0975, "sigma": 0.001}
+    params_init = bestp  #[a, b, sigma, rho, m]
     
     def objective(params):
         return svi_rss(k_lognrm,params,obs_vars,T)
@@ -74,6 +57,7 @@ def svi_fit(k_lognrm,obs_vars,bestp,T):
     return result
 
 def SVIDensity(K_norm,params):
+
     """Closed form expression for the density function associated to an SVI smile,
         derived using Breeden-Litzenberger Rule
         
@@ -89,3 +73,8 @@ def SVIDensity(K_norm,params):
     tmp2=-4*k**2*V1**2 +4*V*V1*(4*k +V1) +  V**2*(V1**2 -8*(2 + V2))
     tmp3=16*K_norm**1.5*np.sqrt(2*math.pi)*V**2.5
     return tmp*tmp2/tmp3
+
+if __name__ == "__main__":
+    print("--- Running SVI function tests ---")
+    #Put tests here
+    print("--- Tests finished ---")
