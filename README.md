@@ -1,2 +1,8 @@
 # DenseSmiles
-Using optimal transport algorithms to calibrate a joint density of multiple FX rates using volatility smiles fitted from observed option prices. Application to pricing FX derivatives such as baskets and quanto derivatives.
+The code in this repository demonstrates some model-free methods in finance, primarily the Sinkhorn algorithm for density calibration and Linear Programming for determining robust hedges. The attached pdf provides an introduction to the theory of optimal transport which rigorously grounds these methods.
+
+## Requirements
+Some of the code requires a `Mosek Licence (https://www.mosek.com/)
+
+## Abstract of Project Paper
+This paper will survey the elements of Optimal Transport theory required to implement model-agnostic methods in quantitative finance, including Kantorovich Duality, entropic calibration methods, and martingale constrained Linear Programming approaches. This will be followed by several numerical demonstrations. Specifically, we begin by calibrating a joint density capable of pricing exotics on a pair of FX rates while remaining consistent with vanilla option prices on all currency pairings. We then demonstrate how a linear programming framework can be applied to find model-independent price bounds in the spirit of work by Henry-Labordère and Hobson, and explore the interpretations of the Lagrangian dual variables as static hedging strategies. We also examine the sparsity of the maximal and minimal admissible distributions when enforcing martingale constraints, and how it relates to the concept of ``Left-Curtain Couplings''. Finally, we consider a higher-dimensional linear programming problem in the form of the VIX/SPX calibration problem originally solved by Julien Guyon.

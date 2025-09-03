@@ -40,7 +40,6 @@ x_vals = np.linspace(0.8, 1.2, grid_size)
 y_vals = np.linspace(0.8, 1.2, grid_size)
 X, Y = np.meshgrid(x_vals, y_vals, indexing='ij')
 
-
 """CONSTRAINT MATRICES for Primal LP"""
 #Normalisation constraint of PMF
 A_norm=np.ones((1,grid_size**2))
@@ -101,13 +100,12 @@ def payoff_gen(X,Y,K=None):
     #return np.maximum(np.maximum(X,Y)-K,0) #Best-Of Call payoff
     #return np.maximum(X/Y - K,0)  #Quanto call payoff
     #return np.maximum(0.5*(X+Y)-K,0) #basket option payoff
-    return np.maximum(0.5*(X+Y)-K,0)
+    #((X > K) & (Y > K)).astype(float) #Binary option
+    return np.maximum(X/Y - K,0)
 
 K=1
 payoff_grid = payoff_gen(X, Y, K)
 payoff_flat = payoff_grid.flatten()
-
-
 
 """Primal Problem Solver"""
 #primal upper
@@ -188,7 +186,6 @@ max_weight = max(
     np.max(np.abs(weights_Y_super)),
     np.max(np.abs(weights_Z_super))
 )
-
 # Plot X vanilla calls
 axs[0].bar(np.arange(len(weights_X_super)), weights_X_super / max_weight, width=0.1)
 axs[0].set_title(f"X vanilla calls\nForward weight: {weight_fX_super:.4f}")
@@ -215,10 +212,8 @@ plt.tight_layout()
 plt.show(block=True)
 
 """OUTPUT 3 - Heatmap of Performance of the Superhedge"""
-
 #payoff of the superhedge
 superhedge_grid = np.zeros_like(payoff_grid)
-
 for idx, K_x in enumerate(X_norm):
     superhedge_grid += weights_X_super[idx] * np.maximum(X - K_x, 0)
 
@@ -230,11 +225,9 @@ for idx, K_z in enumerate(Z_norm):
 
 superhedge_grid += weight_fX_super * (X - 1.0)
 superhedge_grid += weight_fY_super * (Y - 1.0)
-
 diff_super = superhedge_grid - payoff_grid
 
 fig, axs = plt.subplots(1, 2, figsize=(12, 5))
-
 im0 = axs[0].imshow(payoff_grid, extent=[Y.min(), Y.max(), X.min(), X.max()],
                     origin='lower', aspect='equal', cmap='viridis')
 axs[0].set_title("Payoff function")
@@ -242,7 +235,8 @@ axs[0].set_xlabel("Y")
 axs[0].set_ylabel("X")
 fig.colorbar(im0, ax=axs[0])
 
-im1 = axs[1].imshow(diff_super, extent=[Y.min(), Y.max(), X.min(), X.max()],origin='lower', aspect='equal', cmap='coolwarm')
+im1 = axs[1].imshow(diff_super, extent=[Y.min(), Y.max(), X.min(), X.max()],
+                    origin='lower', aspect='equal', cmap='coolwarm')
 axs[1].set_title("Superhedge minus Payoff")
 axs[1].set_xlabel("Y")
 axs[1].set_ylabel("X")

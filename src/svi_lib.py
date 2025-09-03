@@ -1,5 +1,4 @@
 """Code for handling implied vol data, fitting SVI smiles, transforming the smiles into probability densities"""
-
 import numpy as np
 from scipy.optimize import minimize
 import math
@@ -30,7 +29,6 @@ def svi_var(k_lognrm,params):
 
 def svi_vol(k_lognrm,params,T):
     """SVI parameterisation of the implied volatility
-    
     Ensure that strikes are log-normalised!
     """
     return np.sqrt(svi_var(k_lognrm,params)/T)
@@ -40,30 +38,22 @@ def svi_rss(k_lognrm,params,obs_v,T):
     return np.sum((svi_vol(k_lognrm,params,T)-obs_v)**2)
 
 def svi_fit(k_lognrm,obs_vars,bestp,T):
-    """Uses an initial guess, svi_rss loss function and scipy optimiser to fit an svi smile to implied volatility data"""
-    params_init = bestp  #[a, b, sigma, rho, m]
-    
+    """fits an svi smile to implied volatility data"""
+    params_init = bestp  #best guess [a, b, sigma, rho, m]
     def objective(params):
         return svi_rss(k_lognrm,params,obs_vars,T)
     
-    result = minimize(
-        fun=objective, 
-        x0=params_init,
-        method='Nelder-Mead', 
+    result = minimize(fun=objective, x0=params_init,method='Nelder-Mead', 
         tol=1E-14, 
         options={"maxiter":2000}
     )
-    
     return result
 
 def SVIDensity(K_norm,params):
-
     """Closed form expression for the density function associated to an SVI smile,
         derived using Breeden-Litzenberger Rule
-        
         NB: Strike input is to be normalised by the forward price but NOT in log-space
         """
-
     a=params[0];b=params[1];sigma=params[2];rho=params[3];m=params[4];
     k=np.log(K_norm)
     V=a + b*(rho*(k - m) + np.sqrt((k - m)**2 + sigma**2))
@@ -73,8 +63,3 @@ def SVIDensity(K_norm,params):
     tmp2=-4*k**2*V1**2 +4*V*V1*(4*k +V1) +  V**2*(V1**2 -8*(2 + V2))
     tmp3=16*K_norm**1.5*np.sqrt(2*math.pi)*V**2.5
     return tmp*tmp2/tmp3
-
-if __name__ == "__main__":
-    print("--- Running SVI function tests ---")
-    #Put tests here
-    print("--- Tests finished ---")

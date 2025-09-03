@@ -4,8 +4,7 @@ from scipy.interpolate import CubicSpline
 import numpy as np
 from scipy.optimize import bisect
 import src.svi_lib as svi_lib
-
-"""Sinkhorn Calibration function"""
+"""Sinkhorn Spline Calibration function"""
 def sinkhorn(sinkgrid,sinkweights,mu_X,mu_Y,mu_Z,iterations):
     """Input: Accepts a Gaussian Quadrature grid, the three density functions for calibration
         and the desired number of iterations
@@ -42,7 +41,7 @@ def sinkhorn(sinkgrid,sinkweights,mu_X,mu_Y,mu_Z,iterations):
             w_z[k] = bisect(root_func, -5000, 100,rtol=1e-4)
     return u_x, v_y, w_z
 
-"""Sinkhorn density grid function from market data"""
+"""outputs sinkhorn PMF directly from market data"""
 def sink_density(Xmesh, Ymesh,T,X_strikes_lognrm,X_market_vols,Y_strikes_lognrm,Y_market_vols,Z_strikes_lognrm,Z_market_vols):
     Xopt = svi_lib.svi_fit(X_strikes_lognrm,X_market_vols,[0.0001, 0.002, 0.0014, 0, 0.005],T)
     Yopt = svi_lib.svi_fit(Y_strikes_lognrm,Y_market_vols,[0.0001, 0.002, 0.0014, 0, 0.005],T)
@@ -71,5 +70,3 @@ def sink_density(Xmesh, Ymesh,T,X_strikes_lognrm,X_market_vols,Y_strikes_lognrm,
     v_spline = CubicSpline(sinkgrid, opt_v)
     w_spline = CubicSpline(z_points, opt_w)
     return opt_mu(Xmesh, Ymesh, u_spline, v_spline, w_spline)
-
-print()
